@@ -28,3 +28,23 @@ a.src:hover{text-decoration:underline}
 .tool{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem}
 hr{border:none;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(255,255,255,.03));margin:1rem 0}
 small{color:var(--muted)}
+
+/* --- EKLER: form alanlarını tam genişlik + açıklama kutusu --- */
+.controls input[type="text"],
+.controls input[type="url"],
+.controls input[type="search"],
+.controls textarea,
+.controls select{
+  width:100%;
+}
+
+.controls textarea#desc{
+  min-height:80px;
+  resize:vertical; /* istersen none yapabilirsin */
+}
+
+/* mobil düzen */
+@media (max-width:600px){
+  .controls{gap:.6rem}
+  .controls button{width:100%}
+}
