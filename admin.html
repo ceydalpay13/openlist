@@ -58,15 +58,10 @@
   <script type="module">
     const popup = document.getElementById('popup');
     const dismiss = document.getElementById('dismiss');
-    try{
-      if(!localStorage.getItem('first_visit_ack')){
-        popup.style.display = 'flex';
-      }
-      dismiss?.addEventListener('click', ()=>{
-        localStorage.setItem('first_visit_ack','1');
-        popup.style.display = 'none';
-      });
-    }catch(e){}
+    popup.style.display = 'flex';
+    dismiss?.addEventListener('click', ()=>{
+      popup.style.display = 'none';
+    });
   </script>
 </body>
 </html>
