@@ -1,54 +1,51 @@
-// assets/admin.js — kalıcı oturum + hesap seçici + reject/approve + description taşıma
+// assets/admin.js — kalıcı oturum + hesap seçici + approve/reject + description + nameLower
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
   onAuthStateChanged, signOut, setPersistence, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp, getDoc
+  getFirestore, collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp, getDoc, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const app = initializeApp(window.__FIREBASE_CONFIG__);
-const db = getFirestore(app);
+const app  = initializeApp(window.__FIREBASE_CONFIG__);
+const db   = getFirestore(app);
 const auth = getAuth(app);
 auth.useDeviceLanguage();
 
 // Kalıcı oturum (beni hatırla)
 await setPersistence(auth, browserLocalPersistence);
 
-// Hesap seçici her seferinde açılsın
+// Hesap seçici (her girişte hesap seçtir)
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
 const $ = s => document.querySelector(s);
 const loginBtn = $("#login");
 const logoutBtn = $("#logout");
-const who = $("#who");
-const pending = $("#pending");
+const who   = $("#who");
+const pendingEl = $("#pending");
 const ADMIN_EMAILS = (window.__ADMIN_EMAILS__ || []).map(s => String(s).toLowerCase());
 
-// Hata yazdır
 function showErr(e){
   console.error(e);
   who.textContent = `Giriş/işlem hatası: ${e?.code || e?.message || e}`;
 }
-const isAdmin = (u)=> !!(u && ADMIN_EMAILS.includes((u.email||"").toLowerCase()));
+const isAdmin = u => !!(u && ADMIN_EMAILS.includes((u.email||"").toLowerCase()));
 
-// Bekleyenleri yükle (description da göster)
+// Bekleyenleri yükle (tarihe göre yeni→eski)
 async function loadPending(){
   try{
-    pending.innerHTML = "";
-    const snap = await getDocs(collection(db,"pending"));
+    pendingEl.innerHTML = "";
+    const snap = await getDocs(query(collection(db,"pending"), orderBy("created","desc")));
     snap.forEach(d => {
       const x = d.data();
       const when = x.created?.toDate ? x.created.toDate().toLocaleString() : "";
-      const tags = (x.tags||[]).map(t=>`<span class="badge">#${t}</span>`).join(" ");
       const desc = x.description ? `<div style="margin-top:.35rem;color:var(--muted)">${String(x.description)}</div>` : "";
-      pending.insertAdjacentHTML("beforeend", `
+      pendingEl.insertAdjacentHTML("beforeend", `
         <div class="card">
           <div class="meta">
-            <strong>${x.name||"(İsimsiz)"}</strong>
-            <div class="badges">${tags}</div>
+            <strong>${x.name || "(İsimsiz)"}</strong>
             ${desc}
             <div style="margin-top:.35rem;">
               <a class="src" href="${x.url}" target="_blank" rel="noopener">Kaynak</a> • <small>${when}</small>
@@ -64,13 +61,13 @@ async function loadPending(){
   }catch(e){ showErr(e); }
 }
 
-// Onay / Ret
-pending.addEventListener("click", async (e)=>{
+// Onay / Ret işlemleri
+pendingEl.addEventListener("click", async (e)=>{
   const btn = e.target.closest("button[data-act]");
   if(!btn) return;
 
   try{
-    const id = btn.dataset.id;
+    const id  = btn.dataset.id;
     const ref = doc(db,"pending", id);
     const snap = await getDoc(ref);
     const data = snap.data();
@@ -79,13 +76,13 @@ pending.addEventListener("click", async (e)=>{
     if(btn.dataset.act === "approve"){
       await addDoc(collection(db,"approved"), {
         name: data.name,
+        nameLower: (data.name || "").toLocaleLowerCase("tr"),
         url: data.url,
-        tags: data.tags || [],
-        description: data.description || "",   // ← açıklamayı taşı
+        description: data.description || "",
         created: serverTimestamp()
       });
       await deleteDoc(ref);
-    } else { // reject
+    }else{
       await deleteDoc(ref);
     }
     await loadPending();
@@ -94,13 +91,15 @@ pending.addEventListener("click", async (e)=>{
 
 // Giriş (popup; engellenirse redirect)
 loginBtn.addEventListener("click", async ()=>{
-  try {
+  try{
     await signInWithPopup(auth, provider);
-  } catch (e) {
+  }catch(e){
     if (e?.code === "auth/popup-blocked" || e?.code === "auth/cancelled-popup-request") {
-      try { await signInWithRedirect(auth, provider); }
-      catch (er2) { showErr(er2); }
-    } else { showErr(e); }
+      try{ await signInWithRedirect(auth, provider); }
+      catch(er2){ showErr(er2); }
+    }else{
+      showErr(e);
+    }
   }
 });
 
@@ -118,11 +117,11 @@ onAuthStateChanged(auth, async (user)=>{
     who.textContent = `Bu sayfayı görüntüleme yetkiniz yok: ${user.email}`;
     loginBtn.style.display = "inline-block";
     logoutBtn.style.display = "inline-block";
-    pending.innerHTML = "";
+    pendingEl.innerHTML = "";
   }else{
     who.textContent = "Lütfen Google ile giriş yapınız.";
     loginBtn.style.display = "inline-block";
     logoutBtn.style.display = "none";
-    pending.innerHTML = "";
+    pendingEl.innerHTML = "";
   }
 });

@@ -32,7 +32,10 @@ input:focus,select:focus,textarea:focus,button:focus{
 }
 button{cursor:pointer}
 
+/* GRID */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.8rem}
+/* tek sütun görünüm */
+.grid.one{ grid-template-columns: 1fr; }
 
 .card{
   border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03);
@@ -46,8 +49,19 @@ button{cursor:pointer}
 }
 .card .meta{padding:.6rem .8rem}
 
+/* link yazıları */
 a.src{color:var(--accent);text-decoration:none;word-break:break-all;}
 a.src:hover{text-decoration:underline}
+
+/* link badge (kart içi "Kaynak Linki" butonu) */
+.link-badge{
+  display:inline-block; margin-top:.4rem; padding:.3rem .7rem;
+  border-radius:8px; border:1px solid var(--accent);
+  background:rgba(138,180,255,.1); color:var(--accent);
+  font-size:.85rem; font-weight:500; text-decoration:none;
+  word-break:break-all; transition:all .2s ease;
+}
+.link-badge:hover{ background:rgba(138,180,255,.2); color:#fff; border-color:rgba(138,180,255,.9); }
 
 .footer{margin:2rem 0 1rem;color:var(--muted);font-size:.9rem}
 

@@ -73,9 +73,9 @@ const PAGE = 20;               // her istekte kaç kayıt
 let lastCursor = null;         // Firestore cursor
 let finished   = false;        // daha sayfa var mı?
 
-async function loadMore(initial=false){
+async function loadMore(){
   if(finished) return;
-  // Cursor’lı sorgu (yalnız "yeni→eski" sırada mantıklı)
+
   const baseQ = query(
     collection(db,"approved"),
     orderBy("created","desc"),
@@ -97,8 +97,10 @@ async function loadMore(initial=false){
 
 function toggleMore(){
   const defaultSort = (sortSel?.value ?? "created_desc") === "created_desc";
+  const hasActiveFilter = !!(filterDomain?.value || (qInput?.value||"").trim());
   if(moreBtn){
-    moreBtn.style.display = defaultSort && !finished ? "inline-block" : "none";
+    // cursor'lı sayfalama sadece created_desc ve filtre yokken mantıklı
+    moreBtn.style.display = defaultSort && !hasActiveFilter && !finished ? "inline-block" : "none";
     moreBtn.disabled = finished;
     moreBtn.textContent = finished ? "Hepsi yüklendi" : "Daha fazla yükle";
   }
@@ -113,7 +115,7 @@ function passesFilter(d){
   }
   const q = norm(qInput?.value);
   if(q){
-    // etiketleri aramadan çıkardık
+    // etiket yok; isim + açıklama + url’de ara
     const hay = norm(`${d.name||""} ${d.description||""} ${d.url}`);
     if(!hay.includes(q)) return false;
   }
@@ -154,4 +156,4 @@ filterDomain?.addEventListener("change", ()=>{ render(); toggleMore(); });
 moreBtn?.addEventListener("click", ()=> loadMore());
 
 /* ---------- İlk yükleme ---------- */
-await loadMore(true);
+await loadMore();
