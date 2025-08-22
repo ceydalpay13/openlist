@@ -1,14 +1,18 @@
+// assets/app.js — onaylı kayıtlar + arama/filtre + sayfalama ("Daha fazla yükle")
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getFirestore, collection, getDocs, query, orderBy, limit, startAfter
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp(window.__FIREBASE_CONFIG__);
-const db = getFirestore(app);
+const db  = getFirestore(app);
 
 const $ = s => document.querySelector(s);
-const grid = $("#grid");
-const qInput = $("#q");
-const sortSel = $("#sort");
+const grid         = $("#grid");
+const qInput       = $("#q");
+const sortSel      = $("#sort");
 const filterDomain = $("#filterDomain");
+const moreBtn      = $("#more"); // index.html’de grid’in altına ekleyin
 
 function norm(s){ return (s||"").toLocaleUpperCase("tr"); }
 
@@ -25,14 +29,13 @@ function sourceType(url){
 
 // KART HTML — açıklama + tıklanabilir kart + mümkünse embed
 function cardHTML(d){
-  const when = d.created?.toDate ? d.created.toDate().toLocaleString() : "";
+  const when  = d.created?.toDate ? d.created.toDate().toLocaleString() : "";
   const type  = sourceType(d.url);
   const title = d.name || "(İsimsiz)";
   const desc  = d.description ? String(d.description) : "";
   const tags  = (d.tags||[]).map(t=>`<span class="badge">#${t}</span>`).join(" ");
 
   let body = `<a class="src" href="${d.url}" target="_blank" rel="noopener">Kaynağa git</a>`;
-
   if(type==="twitter"){
     body = `<blockquote class="twitter-tweet"><a href="${d.url}"></a></blockquote>`;
   }else if(type==="instagram"){
@@ -51,7 +54,6 @@ function cardHTML(d){
     }catch{}
   }
 
-  // Kartın tamamını link yapalım (yeni sekme)
   return `
     <a class="card" href="${d.url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
       <div class="meta">
@@ -65,23 +67,51 @@ function cardHTML(d){
   `;
 }
 
-let DATA = [];
+/* ---------- Sayfalama durumu ---------- */
+let DATA = [];                 // ekranda gösterilecek toplu veri (sayfa sayfa büyür)
+const PAGE = 20;               // her istekte kaç kayıt
+let lastCursor = null;         // Firestore cursor
+let finished   = false;        // daha sayfa var mı?
 
-async function load(){
-  const snap = await getDocs(query(collection(db,"approved"), orderBy("created","desc")));
-  DATA = snap.docs.map(d=> d.data());
+async function loadMore(initial=false){
+  if(finished) return;
+  // Cursor’lı sorgu (yalnız "yeni→eski" sırada mantıklı)
+  const baseQ = query(
+    collection(db,"approved"),
+    orderBy("created","desc"),
+    ...(lastCursor ? [startAfter(lastCursor)] : []),
+    limit(PAGE)
+  );
+
+  const snap = await getDocs(baseQ);
+  if(snap.empty){ finished = true; toggleMore(); return; }
+
+  const chunk = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  DATA = DATA.concat(chunk);
+  lastCursor = snap.docs[snap.docs.length-1];
+  if(snap.size < PAGE) finished = true;
+
   render();
+  toggleMore();
 }
 
+function toggleMore(){
+  const defaultSort = (sortSel?.value ?? "created_desc") === "created_desc";
+  if(moreBtn){
+    moreBtn.style.display = defaultSort && !finished ? "inline-block" : "none";
+    moreBtn.disabled = finished;
+    moreBtn.textContent = finished ? "Hepsi yüklendi" : "Daha fazla yükle";
+  }
+}
+
+/* ---------- Filtreleme / sıralama ---------- */
 function passesFilter(d){
-  // Domain filtresi
-  if(filterDomain.value){
+  if(filterDomain?.value){
     const t = sourceType(d.url);
     if(filterDomain.value === "haber" && t !== "news") return false;
     if(filterDomain.value !== "haber" && !d.url.includes(filterDomain.value)) return false;
   }
-  // Arama (isim, etiket, açıklama, url)
-  const q = norm(qInput.value);
+  const q = norm(qInput?.value);
   if(q){
     const hay = norm(`${d.name||""} ${(d.tags||[]).join(" ")} ${d.description||""} ${d.url}`);
     if(!hay.includes(q)) return false;
@@ -92,11 +122,11 @@ function passesFilter(d){
 function render(){
   let list = DATA.slice();
 
-  const [field,dir] = (()=>{
-    if(sortSel.value==="created_desc") return ["created",-1];
-    if(sortSel.value==="created_asc")  return ["created", 1];
-    if(sortSel.value==="name_asc")     return ["name",    1];
-    if(sortSel.value==="name_desc")    return ["name",   -1];
+  const [field,dir] = (() => {
+    if(sortSel?.value==="created_desc") return ["created",-1];
+    if(sortSel?.value==="created_asc")  return ["created", 1];
+    if(sortSel?.value==="name_asc")     return ["name",    1];
+    if(sortSel?.value==="name_desc")    return ["name",   -1];
     return ["created",-1];
   })();
 
@@ -112,13 +142,15 @@ function render(){
   list = list.filter(passesFilter);
   grid.innerHTML = list.map(cardHTML).join("");
 
-  // Embed scriptlerini tetikle
   if(window.twttr?.widgets)  window.twttr.widgets.load();
   if(window.instgrm?.Embeds) window.instgrm.Embeds.process();
 }
 
-qInput.addEventListener("input", render);
-sortSel.addEventListener("change", render);
-filterDomain.addEventListener("change", render);
+/* ---------- Eventler ---------- */
+qInput?.addEventListener("input", ()=>{ render(); toggleMore(); });
+sortSel?.addEventListener("change", ()=>{ render(); toggleMore(); });
+filterDomain?.addEventListener("change", ()=>{ render(); toggleMore(); });
+moreBtn?.addEventListener("click", ()=> loadMore());
 
-await load();
+/* ---------- İlk yükleme ---------- */
+await loadMore(true);
