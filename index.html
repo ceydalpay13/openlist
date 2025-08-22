@@ -59,10 +59,10 @@
   <!-- Firebase configini KENDİN doldur -->
   <script type="module">
     window.__FIREBASE_CONFIG__ = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyBrBv6t6HbnqSBdqBlkjydTVsCciO3Od4Y",
+      authDomain: "openlist-79ded.firebaseapp.com",
+      projectId: "openlist-79ded",
+      appId: "1:983271092801:web:9e0394564c10342e6f0cc0"
     };
   </script>
 
@@ -74,6 +74,7 @@
 
   <!-- popup kontrolü -->
   <script type="module">
+<<<<<<< HEAD
     const popup = document.getElementById('popup');
     const dismiss = document.getElementById('dismiss');
    popup.style.display = 'flex';
@@ -81,5 +82,15 @@
     popup.style.display = 'none';
    });
   </script>
+=======
+  const popup = document.getElementById('popup');
+  const dismiss = document.getElementById('dismiss');
+  // her girişte popup aç
+  popup.style.display = 'flex';
+  dismiss?.addEventListener('click', ()=>{
+    popup.style.display = 'none';
+  });
+</script>
+>>>>>>> f215464 (firebase config eklendi ve popup düzenlendi)
 </body>
 </html>
