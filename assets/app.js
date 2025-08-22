@@ -12,7 +12,7 @@ const grid         = $("#grid");
 const qInput       = $("#q");
 const sortSel      = $("#sort");
 const filterDomain = $("#filterDomain");
-const moreBtn      = $("#more"); // index.html’de grid’in altına ekleyin
+const moreBtn      = $("#more");
 
 function norm(s){ return (s||"").toLocaleUpperCase("tr"); }
 
@@ -27,26 +27,26 @@ function sourceType(url){
   }catch{ return "news"; }
 }
 
-// KART HTML — açıklama + tıklanabilir kart + mümkünse embed
+// Kart HTML — açıklama + link badge + mümkünse embed (kart komple tıklanmaz)
 function cardHTML(d){
   const when  = d.created?.toDate ? d.created.toDate().toLocaleString() : "";
   const type  = sourceType(d.url);
   const title = d.name || "(İsimsiz)";
   const desc  = d.description ? String(d.description) : "";
-  const tags  = (d.tags||[]).map(t=>`<span class="badge">#${t}</span>`).join(" ");
 
-  let body = `<a class="src" href="${d.url}" target="_blank" rel="noopener">Kaynağa git</a>`;
+  // embed hazırlığı
+  let embed = "";
   if(type==="twitter"){
-    body = `<blockquote class="twitter-tweet"><a href="${d.url}"></a></blockquote>`;
+    embed = `<blockquote class="twitter-tweet"><a href="${d.url}"></a></blockquote>`;
   }else if(type==="instagram"){
-    body = `<blockquote class="instagram-media" data-instgrm-permalink="${d.url}" data-instgrm-version="14"></blockquote>`;
+    embed = `<blockquote class="instagram-media" data-instgrm-permalink="${d.url}" data-instgrm-version="14"></blockquote>`;
   }else if(type==="youtube"){
     try{
       const u = new URL(d.url);
       let vid = u.searchParams.get("v")||"";
       if(!vid && u.hostname.includes("youtu.be")) vid = u.pathname.slice(1);
       if(vid){
-        body = `<div style="position:relative;padding-top:56.25%;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+        embed = `<div style="position:relative;padding-top:56.25%;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
           <iframe src="https://www.youtube.com/embed/${vid}" title="YouTube"
             style="position:absolute;inset:0;width:100%;height:100%;border:0;" allowfullscreen loading="lazy"></iframe>
         </div>`;
@@ -55,15 +55,15 @@ function cardHTML(d){
   }
 
   return `
-    <a class="card" href="${d.url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
+    <div class="card">
       <div class="meta">
         <strong>${title}</strong>
-        <div class="badges">${tags}</div>
         ${desc ? `<div style="margin-top:.35rem;color:var(--muted)">${desc}</div>` : ""}
+        <div><a class="link-badge" href="${d.url}" target="_blank" rel="noopener">Kaynak Linki</a></div>
         <div style="margin-top:.35rem;"><small>${when}</small></div>
       </div>
-      <div class="meta">${body}</div>
-    </a>
+      ${embed ? `<div class="meta">${embed}</div>` : ""}
+    </div>
   `;
 }
 
@@ -113,7 +113,8 @@ function passesFilter(d){
   }
   const q = norm(qInput?.value);
   if(q){
-    const hay = norm(`${d.name||""} ${(d.tags||[]).join(" ")} ${d.description||""} ${d.url}`);
+    // etiketleri aramadan çıkardık
+    const hay = norm(`${d.name||""} ${d.description||""} ${d.url}`);
     if(!hay.includes(q)) return false;
   }
   return true;
