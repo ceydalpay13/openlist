@@ -8,17 +8,6 @@
   <meta name="color-scheme" content="dark light" />
 </head>
 <body>
-  <!-- popup -->
-  <div class="modal-backdrop" id="popup">
-    <div class="modal">
-      <h3>Önemli Bilgilendirme</h3>
-      <p class="notice">
-        uygulamada link ekleme zorunluluğu ve moderasyon kontrolü bulunmaktadır. bunun sebebi tamamen ismi geçen kişilerin uygulamayı kapattırmasını önlemek ve ifşa eden kişiyi herhangi bir yükümlülük altında bırakmamaktır. taciz çok hassas bir konudur ve mağdur beyanı esastır. bu bir açık liste olduğu için amaç mağdurların ifşalarının arka planda kalmasını önlemektir. sizi görüyor ve duyuyorum. asla yalnız yürümeyeceksiniz. cesaretiniz için teşekkür ederim
-      </p>
-      <div class="actions"><button id="dismiss">Tamam</button></div>
-    </div>
-  </div>
-
   <div class="container">
     <header class="nav">
       <div class="brand"><a href="index.html">Kaynaklı Açık Liste</a></div>
@@ -45,6 +34,7 @@
     <footer class="footer"><small>Gönderimler uygun görülürse yayına alınır.</small></footer>
   </div>
 
+  <!-- Firebase config -->
   <script type="module">
     window.__FIREBASE_CONFIG__ = {
       apiKey: "AIzaSyBrBv6t6HbnqSBdqBlkjydTVsCciO3Od4Y",
@@ -53,16 +43,8 @@
       appId: "1:983271092801:web:9e0394564c10342e6f0cc0"
     };
   </script>
-  <script type="module" src="assets/submit.js"></script>
 
-  <script type="module">
-  const popup = document.getElementById('popup');
-  const dismiss = document.getElementById('dismiss');
-  // her girişte popup aç
-  popup.style.display = 'flex';
-  dismiss?.addEventListener('click', ()=>{
-    popup.style.display = 'none';
-  });
-</script>
+  <!-- Submit JS -->
+  <script type="module" src="assets/submit.js"></script>
 </body>
 </html>
