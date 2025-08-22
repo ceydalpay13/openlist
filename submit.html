@@ -20,14 +20,17 @@
 
     <section class="panel">
       <h2>Yeni Link Gönder</h2>
-      <p><small>Not: Yalnızca kaynak linki kabul edilir (X/Instagram/YouTube/haber siteleri). Gönderimler önce moderasyona düşer.</small></p>
+      <p><small>Yalnızca kaynak linki kabul edilir (X/Instagram/YouTube/haber siteleri). Gönderimler önce moderasyona düşer.</small></p>
 
-      <form id="form" class="controls" style="flex-direction:column;align-items:flex-start">
+      <form id="form" class="controls" style="flex-direction:column;align-items:flex-start;max-width:720px">
         <input id="name" type="text" placeholder="İsim (ünlü kişi) – zorunlu" required />
         <input id="link" type="url" placeholder="Kaynak linki (zorunlu)" required />
         <input id="tags" type="text" placeholder="#etiket #kategori (opsiyonel)" />
+        <!-- yeni: kısa açıklama -->
+        <textarea id="desc" rows="3" placeholder="Kısa açıklama (opsiyonel) — bağlam, özet, not..."></textarea>
         <button type="submit">Gönder</button>
       </form>
+
       <div id="msg"></div>
     </section>
 

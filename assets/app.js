@@ -4,13 +4,13 @@ import { getFirestore, collection, getDocs, query, orderBy } from "https://www.g
 const app = initializeApp(window.__FIREBASE_CONFIG__);
 const db = getFirestore(app);
 
-const $ = s=>document.querySelector(s);
+const $ = s => document.querySelector(s);
 const grid = $("#grid");
 const qInput = $("#q");
 const sortSel = $("#sort");
 const filterDomain = $("#filterDomain");
 
-function norm(s){return (s||"").toLocaleUpperCase("tr");}
+function norm(s){ return (s||"").toLocaleUpperCase("tr"); }
 
 function sourceType(url){
   try{
@@ -23,12 +23,16 @@ function sourceType(url){
   }catch{ return "news"; }
 }
 
+// KART HTML — açıklama + tıklanabilir kart + mümkünse embed
 function cardHTML(d){
   const when = d.created?.toDate ? d.created.toDate().toLocaleString() : "";
-  const type = sourceType(d.url);
+  const type  = sourceType(d.url);
   const title = d.name || "(İsimsiz)";
-  const tags = (d.tags||[]).map(t=>`<span class="badge">#${t}</span>`).join(" ");
+  const desc  = d.description ? String(d.description) : "";
+  const tags  = (d.tags||[]).map(t=>`<span class="badge">#${t}</span>`).join(" ");
+
   let body = `<a class="src" href="${d.url}" target="_blank" rel="noopener">Kaynağa git</a>`;
+
   if(type==="twitter"){
     body = `<blockquote class="twitter-tweet"><a href="${d.url}"></a></blockquote>`;
   }else if(type==="instagram"){
@@ -40,19 +44,25 @@ function cardHTML(d){
       if(!vid && u.hostname.includes("youtu.be")) vid = u.pathname.slice(1);
       if(vid){
         body = `<div style="position:relative;padding-top:56.25%;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
-          <iframe src="https://www.youtube.com/embed/${vid}" title="YouTube" style="position:absolute;inset:0;width:100%;height:100%;border:0;" allowfullscreen loading="lazy"></iframe>
+          <iframe src="https://www.youtube.com/embed/${vid}" title="YouTube"
+            style="position:absolute;inset:0;width:100%;height:100%;border:0;" allowfullscreen loading="lazy"></iframe>
         </div>`;
       }
     }catch{}
   }
-  return `<div class="card">
-    <div class="meta">
-      <strong>${title}</strong>
-      <div class="badges">${tags}</div>
-      <div><small>${when}</small></div>
-    </div>
-    <div class="meta">${body}</div>
-  </div>`;
+
+  // Kartın tamamını link yapalım (yeni sekme)
+  return `
+    <a class="card" href="${d.url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">
+      <div class="meta">
+        <strong>${title}</strong>
+        <div class="badges">${tags}</div>
+        ${desc ? `<div style="margin-top:.35rem;color:var(--muted)">${desc}</div>` : ""}
+        <div style="margin-top:.35rem;"><small>${when}</small></div>
+      </div>
+      <div class="meta">${body}</div>
+    </a>
+  `;
 }
 
 let DATA = [];
@@ -62,16 +72,18 @@ async function load(){
   DATA = snap.docs.map(d=> d.data());
   render();
 }
+
 function passesFilter(d){
+  // Domain filtresi
   if(filterDomain.value){
     const t = sourceType(d.url);
-    if(filterDomain.value==="haber" && (t==="news")) { /* ok */ }
-    else if(filterDomain.value!=="haber" && !d.url.includes(filterDomain.value)) return false;
-    if(filterDomain.value==="haber" && (t!=="news")) return false;
+    if(filterDomain.value === "haber" && t !== "news") return false;
+    if(filterDomain.value !== "haber" && !d.url.includes(filterDomain.value)) return false;
   }
+  // Arama (isim, etiket, açıklama, url)
   const q = norm(qInput.value);
   if(q){
-    const hay = norm(`${d.name||""} ${(d.tags||[]).join(" ")} ${d.url}`);
+    const hay = norm(`${d.name||""} ${(d.tags||[]).join(" ")} ${d.description||""} ${d.url}`);
     if(!hay.includes(q)) return false;
   }
   return true;
@@ -79,25 +91,29 @@ function passesFilter(d){
 
 function render(){
   let list = DATA.slice();
-  const [f,dir] = (function(){
+
+  const [field,dir] = (()=>{
     if(sortSel.value==="created_desc") return ["created",-1];
-    if(sortSel.value==="created_asc") return ["created",1];
-    if(sortSel.value==="name_asc") return ["name",1];
-    if(sortSel.value==="name_desc") return ["name",-1];
+    if(sortSel.value==="created_asc")  return ["created", 1];
+    if(sortSel.value==="name_asc")     return ["name",    1];
+    if(sortSel.value==="name_desc")    return ["name",   -1];
     return ["created",-1];
   })();
+
   list.sort((a,b)=>{
-    if(f==="created"){
+    if(field==="created"){
       const av = a.created?.seconds||0, bv = b.created?.seconds||0;
       return dir*(av-bv);
     }else{
-      const av = (a.name||"").localeCompare(b.name||"", "tr");
-      return dir*av;
+      return dir*((a.name||"").localeCompare(b.name||"", "tr"));
     }
   });
+
   list = list.filter(passesFilter);
   grid.innerHTML = list.map(cardHTML).join("");
-  if(window.twttr?.widgets) window.twttr.widgets.load();
+
+  // Embed scriptlerini tetikle
+  if(window.twttr?.widgets)  window.twttr.widgets.load();
   if(window.instgrm?.Embeds) window.instgrm.Embeds.process();
 }
 

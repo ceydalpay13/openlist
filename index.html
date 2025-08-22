@@ -8,12 +8,16 @@
   <meta name="color-scheme" content="dark light" />
 </head>
 <body>
-  <!-- İlk ziyaret popup -->
+  <!-- Bilgilendirme popup (her girişte) -->
   <div class="modal-backdrop" id="popup">
     <div class="modal">
       <h3>Önemli Bilgilendirme</h3>
       <p class="notice">
-        uygulamada link ekleme zorunluluğu ve moderasyon kontrolü bulunmaktadır. bunun sebebi tamamen ismi geçen kişilerin uygulamayı kapattırmasını önlemek ve ifşa eden kişiyi herhangi bir yükümlülük altında bırakmamaktır. taciz çok hassas bir konudur ve mağdur beyanı esastır. bu bir açık liste olduğu için amaç mağdurların ifşalarının arka planda kalmasını önlemektir. sizi görüyor ve duyuyorum. asla yalnız yürümeyeceksiniz. cesaretiniz için teşekkür ederim
+        Uygulamada link ekleme zorunluluğu ve moderasyon kontrolü bulunmaktadır. Bunun sebebi,
+        ismi geçen kişilerin uygulamayı kapattırmasını önlemek ve ifşa eden kişiyi herhangi bir yükümlülük
+        altında bırakmamaktır. Taciz çok hassas bir konudur ve mağdur beyanı esastır. Bu bir açık liste olduğu için
+        amaç mağdurların ifşalarının arka planda kalmasını önlemektir. Sizi görüyor ve duyuyorum. Asla yalnız
+        yürümeyeceksiniz. Cesaretiniz için teşekkür ederim.
       </p>
       <div class="actions">
         <button id="dismiss">Tamam</button>
@@ -34,8 +38,8 @@
     <section class="panel">
       <h2>Onaylı Kayıtlar</h2>
       <div class="controls">
-        <input id="q" type="search" placeholder="İsim veya etiket ara…" />
-        <select id="filterDomain">
+        <input id="q" type="search" placeholder="İsim, etiket ya da açıklama ara…" />
+        <select id="filterDomain" title="Kaynak türü">
           <option value="">Tüm kaynaklar</option>
           <option value="x.com">X/Twitter</option>
           <option value="twitter.com">Twitter</option>
@@ -43,7 +47,7 @@
           <option value="youtube.com">YouTube</option>
           <option value="haber">Haber Siteleri</option>
         </select>
-        <select id="sort">
+        <select id="sort" title="Sırala">
           <option value="created_desc">Yeni → Eski</option>
           <option value="created_asc">Eski → Yeni</option>
           <option value="name_asc">İsim A–Z</option>
@@ -53,10 +57,12 @@
       <div id="grid" class="grid"></div>
     </section>
 
-    <footer class="footer"><small>© 2025 Kaynaklı Açık Liste • Link zorunlu + moderasyonlu</small></footer>
+    <footer class="footer">
+      <small>© 2025 Kaynaklı Açık Liste • Link zorunlu, moderasyonlu</small>
+    </footer>
   </div>
 
-  <!-- Firebase configini KENDİN doldur -->
+  <!-- Firebase config -->
   <script type="module">
     window.__FIREBASE_CONFIG__ = {
       apiKey: "AIzaSyBrBv6t6HbnqSBdqBlkjydTVsCciO3Od4Y",
@@ -66,20 +72,19 @@
     };
   </script>
 
+  <!-- Uygulama -->
   <script type="module" src="assets/app.js"></script>
-  <!-- embed scriptleri -->
+
+  <!-- Embed scriptleri -->
   <script async defer src="https://platform.twitter.com/widgets.js"></script>
   <script async src="https://www.instagram.com/embed.js"></script>
-  <script async src="https://www.tiktok.com/embed.js"></script>
 
-  <!-- popup kontrolü -->
+  <!-- Popup kontrolü (her girişte) -->
   <script type="module">
     const popup = document.getElementById('popup');
     const dismiss = document.getElementById('dismiss');
-   popup.style.display = 'flex';
-   dismiss?.addEventListener('click', ()=>{
-    popup.style.display = 'none';
-   });
+    popup.style.display = 'flex';
+    dismiss?.addEventListener('click', ()=>{ popup.style.display = 'none'; });
   </script>
 </body>
 </html>

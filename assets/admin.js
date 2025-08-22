@@ -1,4 +1,4 @@
-// assets/admin.js — kalıcı oturum (beni hatırla) + hesap seçici + redirect fallback
+// assets/admin.js — kalıcı oturum + hesap seçici + reject/approve + description taşıma
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
@@ -13,10 +13,10 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 auth.useDeviceLanguage();
 
-// ❶ Oturum kalıcı olsun (tarayıcı kapansa da hatırlasın)
+// Kalıcı oturum (beni hatırla)
 await setPersistence(auth, browserLocalPersistence);
 
-// ❷ Hesap seçiciyi göster (ilk girişte hesap seçilsin)
+// Hesap seçici her seferinde açılsın
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
@@ -27,16 +27,14 @@ const who = $("#who");
 const pending = $("#pending");
 const ADMIN_EMAILS = (window.__ADMIN_EMAILS__ || []).map(s => String(s).toLowerCase());
 
-// Hata gösterme yardımcıları
+// Hata yazdır
 function showErr(e){
   console.error(e);
   who.textContent = `Giriş/işlem hatası: ${e?.code || e?.message || e}`;
 }
-function isAdmin(user){
-  return !!(user && ADMIN_EMAILS.includes((user.email || "").toLowerCase()));
-}
+const isAdmin = (u)=> !!(u && ADMIN_EMAILS.includes((u.email||"").toLowerCase()));
 
-// Bekleyenleri yükle
+// Bekleyenleri yükle (description da göster)
 async function loadPending(){
   try{
     pending.innerHTML = "";
@@ -45,12 +43,16 @@ async function loadPending(){
       const x = d.data();
       const when = x.created?.toDate ? x.created.toDate().toLocaleString() : "";
       const tags = (x.tags||[]).map(t=>`<span class="badge">#${t}</span>`).join(" ");
+      const desc = x.description ? `<div style="margin-top:.35rem;color:var(--muted)">${String(x.description)}</div>` : "";
       pending.insertAdjacentHTML("beforeend", `
         <div class="card">
           <div class="meta">
             <strong>${x.name||"(İsimsiz)"}</strong>
             <div class="badges">${tags}</div>
-            <div><a class="src" href="${x.url}" target="_blank" rel="noopener">Kaynak</a> • <small>${when}</small></div>
+            ${desc}
+            <div style="margin-top:.35rem;">
+              <a class="src" href="${x.url}" target="_blank" rel="noopener">Kaynak</a> • <small>${when}</small>
+            </div>
             <div class="controls" style="margin-top:.5rem;display:flex;gap:.4rem">
               <button data-act="approve" data-id="${d.id}">Onayla</button>
               <button data-act="reject" data-id="${d.id}">Reddet</button>
@@ -62,7 +64,7 @@ async function loadPending(){
   }catch(e){ showErr(e); }
 }
 
-// Onay / Ret tıklamaları
+// Onay / Ret
 pending.addEventListener("click", async (e)=>{
   const btn = e.target.closest("button[data-act]");
   if(!btn) return;
@@ -76,7 +78,10 @@ pending.addEventListener("click", async (e)=>{
 
     if(btn.dataset.act === "approve"){
       await addDoc(collection(db,"approved"), {
-        name: data.name, url: data.url, tags: data.tags || [],
+        name: data.name,
+        url: data.url,
+        tags: data.tags || [],
+        description: data.description || "",   // ← açıklamayı taşı
         created: serverTimestamp()
       });
       await deleteDoc(ref);
@@ -102,7 +107,7 @@ loginBtn.addEventListener("click", async ()=>{
 // Çıkış
 logoutBtn.addEventListener("click", ()=> signOut(auth));
 
-// Oturum durumu (sayfa açılır açılmaz otomatik hatırlama burada devreye girer)
+// Oturum durumu
 onAuthStateChanged(auth, async (user)=>{
   if(isAdmin(user)){
     who.textContent = `Giriş yapıldı: ${user.email}`;
