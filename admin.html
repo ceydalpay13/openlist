@@ -8,17 +8,6 @@
   <meta name="color-scheme" content="dark light" />
 </head>
 <body>
-  <!-- popup -->
-  <div class="modal-backdrop" id="popup">
-    <div class="modal">
-      <h3>Önemli Bilgilendirme</h3>
-      <p class="notice">
-        uygulamada link ekleme zorunluluğu ve moderasyon kontrolü bulunmaktadır. ...
-      </p>
-      <div class="actions"><button id="dismiss">Tamam</button></div>
-    </div>
-  </div>
-
   <div class="container">
     <header class="nav">
       <div class="brand"><a href="index.html">Kaynaklı Açık Liste</a></div>
@@ -40,9 +29,12 @@
       <div id="pending" class="grid"></div>
     </section>
 
-    <footer class="footer"><small>Yalnız moderatörler onay/ret işlemi yapabilir.</small></footer>
+    <footer class="footer">
+      <small>Yalnız moderatörler onay/ret işlemi yapabilir.</small>
+    </footer>
   </div>
 
+  <!-- Firebase config (admin sayfasında da olmalı) -->
   <script type="module">
     window.__FIREBASE_CONFIG__ = {
       apiKey: "AIzaSyBrBv6t6HbnqSBdqBlkjydTVsCciO3Od4Y",
@@ -50,19 +42,10 @@
       projectId: "openlist-79ded",
       appId: "1:983271092801:web:9e0394564c10342e6f0cc0"
     };
-    /* admin mail listeni burada gir */
     window.__ADMIN_EMAILS__ = ["ceyda.alpay.6@gmail.com"];
   </script>
-  <script type="module" src="assets/admin.js"></script>
 
-  <script type="module">
-  const popup = document.getElementById('popup');
-  const dismiss = document.getElementById('dismiss');
-  // her girişte popup aç
-  popup.style.display = 'flex';
-  dismiss?.addEventListener('click', ()=>{
-    popup.style.display = 'none';
-  });
-  </script>
+  <!-- Admin JS mutlaka konfigürasyondan sonra -->
+  <script type="module" src="assets/admin.js"></script>
 </body>
 </html>
