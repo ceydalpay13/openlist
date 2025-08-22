@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Moderatör Paneli</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <meta name="color-scheme" content="dark light" />
+</head>
+<body>
+  <!-- popup -->
+  <div class="modal-backdrop" id="popup">
+    <div class="modal">
+      <h3>Önemli Bilgilendirme</h3>
+      <p class="notice">
+        uygulamada link ekleme zorunluluğu ve moderasyon kontrolü bulunmaktadır. ...
+      </p>
+      <div class="actions"><button id="dismiss">Tamam</button></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header class="nav">
+      <div class="brand"><a href="index.html">Kaynaklı Açık Liste</a></div>
+      <nav class="tool">
+        <a href="index.html">Anasayfa</a>
+        <a href="submit.html">Link Gönder</a>
+        <a href="admin.html">Moderatör</a>
+      </nav>
+    </header>
+
+    <section class="panel">
+      <h2>Moderatör Paneli</h2>
+      <div class="controls">
+        <button id="login">Google ile Giriş</button>
+        <button id="logout" style="display:none">Çıkış</button>
+      </div>
+      <div id="who" class="notice"></div>
+      <hr />
+      <div id="pending" class="grid"></div>
+    </section>
+
+    <footer class="footer"><small>Yalnız moderatörler onay/ret işlemi yapabilir.</small></footer>
+  </div>
+
+  <script type="module">
+    window.__FIREBASE_CONFIG__ = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT",
+      appId: "YOUR_APP_ID"
+    };
+    /* admin mail listeni burada gir */
+    window.__ADMIN_EMAILS__ = ["admin@example.com"];
+  </script>
+  <script type="module" src="assets/admin.js"></script>
+
+  <script type="module">
+    const popup = document.getElementById('popup');
+    const dismiss = document.getElementById('dismiss');
+    try{
+      if(!localStorage.getItem('first_visit_ack')){
+        popup.style.display = 'flex';
+      }
+      dismiss?.addEventListener('click', ()=>{
+        localStorage.setItem('first_visit_ack','1');
+        popup.style.display = 'none';
+      });
+    }catch(e){}
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // herkes pending'e create edebilir, okuyamaz
+    match /pending/{doc} {
+      allow create: if true
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.url is string
+        && request.resource.data.url.size() > 0
+        && request.resource.data.tags is list;
+      allow read, update, delete: if false;
+    }
+
+    // approved: herkes okuyabilir, sadece admin yazabilir/silebilir
+    match /approved/{doc} {
+      allow read: if true;
+      allow create, update, delete: if
+        request.auth != null
+        && (
+          request.auth.token.email == "seninmailin@gmail.com"
+          // başka admin eklemek istersen buraya da yaz
+        );
+    }
+  }
+}

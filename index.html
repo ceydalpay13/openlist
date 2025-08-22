@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kaynaklı Açık Liste</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <meta name="color-scheme" content="dark light" />
+</head>
+<body>
+  <!-- İlk ziyaret popup -->
+  <div class="modal-backdrop" id="popup">
+    <div class="modal">
+      <h3>Önemli Bilgilendirme</h3>
+      <p class="notice">
+        uygulamada link ekleme zorunluluğu ve moderasyon kontrolü bulunmaktadır. bunun sebebi tamamen ismi geçen kişilerin uygulamayı kapattırmasını önlemek ve ifşa eden kişiyi herhangi bir yükümlülük altında bırakmamaktır. taciz çok hassas bir konudur ve mağdur beyanı esastır. bu bir açık liste olduğu için amaç mağdurların ifşalarının arka planda kalmasını önlemektir. sizi görüyor ve duyuyorum. asla yalnız yürümeyeceksiniz. cesaretiniz için teşekkür ederim
+      </p>
+      <div class="actions">
+        <button id="dismiss">Tamam</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header class="nav">
+      <div class="brand"><a href="index.html">Kaynaklı Açık Liste</a></div>
+      <nav class="tool">
+        <a href="index.html">Anasayfa</a>
+        <a href="submit.html">Link Gönder</a>
+        <a href="admin.html">Moderatör</a>
+      </nav>
+    </header>
+
+    <section class="panel">
+      <h2>Onaylı Kayıtlar</h2>
+      <div class="controls">
+        <input id="q" type="search" placeholder="İsim veya etiket ara…" />
+        <select id="filterDomain">
+          <option value="">Tüm kaynaklar</option>
+          <option value="x.com">X/Twitter</option>
+          <option value="twitter.com">Twitter</option>
+          <option value="instagram.com">Instagram</option>
+          <option value="youtube.com">YouTube</option>
+          <option value="haber">Haber Siteleri</option>
+        </select>
+        <select id="sort">
+          <option value="created_desc">Yeni → Eski</option>
+          <option value="created_asc">Eski → Yeni</option>
+          <option value="name_asc">İsim A–Z</option>
+          <option value="name_desc">İsim Z–A</option>
+        </select>
+      </div>
+      <div id="grid" class="grid"></div>
+    </section>
+
+    <footer class="footer"><small>© 2025 Kaynaklı Açık Liste • Link zorunlu + moderasyonlu</small></footer>
+  </div>
+
+  <!-- Firebase configini KENDİN doldur -->
+  <script type="module">
+    window.__FIREBASE_CONFIG__ = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT",
+      appId: "YOUR_APP_ID"
+    };
+  </script>
+
+  <script type="module" src="assets/app.js"></script>
+  <!-- embed scriptleri -->
+  <script async defer src="https://platform.twitter.com/widgets.js"></script>
+  <script async src="https://www.instagram.com/embed.js"></script>
+  <script async src="https://www.tiktok.com/embed.js"></script>
+
+  <!-- popup kontrolü -->
+  <script type="module">
+    const popup = document.getElementById('popup');
+    const dismiss = document.getElementById('dismiss');
+    try{
+      if(!localStorage.getItem('first_visit_ack')){
+        popup.style.display = 'flex';
+      }
+      dismiss?.addEventListener('click', ()=>{
+        localStorage.setItem('first_visit_ack','1');
+        popup.style.display = 'none';
+      });
+    }catch(e){}
+  </script>
+</body>
+</html>
