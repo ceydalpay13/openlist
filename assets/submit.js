@@ -26,9 +26,33 @@ const msg  = $("#msg");
 
 // izin verilen kaynak alan adları
 const ALLOW = [
-  "twitter.com","x.com","instagram.com","youtube.com","youtu.be",
-  "bbc.com","dw.com","hurriyet.com.tr","cumhuriyet.com.tr","sozcu.com.tr",
-  "bianet.org","nytimes.com","theguardian.com","evrensel.net","t24.com.tr"
+  // Sosyal medya
+  "twitter.com", "x.com", "instagram.com", "youtube.com", "youtu.be",
+
+  // Türkiye - ana akım
+  "hurriyet.com.tr", "milliyet.com.tr", "ntv.com.tr", "cnnturk.com",
+  "sabah.com.tr", "haberturk.com", "aksam.com.tr", "takvim.com.tr",
+
+  // Türkiye - bağımsız / muhalif
+  "cumhuriyet.com.tr", "sozcu.com.tr", "birgun.net", "evrensel.net",
+  "gazeteduvar.com.tr", "t24.com.tr", "diken.com.tr", "odatv4.com",
+  "bianet.org", "artigercek.com", "tele1.com.tr",
+
+  // Türkiye - ajanslar
+  "aa.com.tr",      // Anadolu Ajansı
+  "dha.com.tr",     // Demirören Haber Ajansı
+  "ankaajansi.com", // ANKA
+
+  // Uluslararası - ajanslar
+  "reuters.com", "apnews.com", "afp.com", "upi.com",
+
+  // Uluslararası - büyük gazeteler
+  "nytimes.com", "theguardian.com", "washingtonpost.com",
+  "wsj.com", "bloomberg.com", "ft.com", "independent.co.uk",
+  "bbc.com", "dw.com", "cnn.com", "aljazeera.com",
+
+  // Uluslararası - dergi/analiz
+  "time.com", "foreignpolicy.com", "economist.com", "vox.com", "politico.com"
 ];
 
 function validLink(url){
