@@ -28,7 +28,7 @@ const msg  = $("#msg");
 const ALLOW = [
   "twitter.com","x.com","instagram.com","youtube.com","youtu.be",
   "bbc.com","dw.com","hurriyet.com.tr","cumhuriyet.com.tr","sozcu.com.tr",
-  "bianet.org","nytimes.com","theguardian.com"
+  "bianet.org","nytimes.com","theguardian.com","evrensel.net"
 ];
 
 function validLink(url){
